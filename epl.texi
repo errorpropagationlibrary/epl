@@ -1,0 +1,433 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@setfilename epl.info
+@settitle EPL documentation
+@c This date is automagically updated when you save this file:
+@set lastupdate June, 5 2001
+@c %**end of header
+
+@c need this for the external reference to ppoe
+@setchapternewpage off
+
+@titlepage
+@title EPL - Error Propagation Library
+@author Achim Bode
+@author last updated @value{lastupdate}
+@end titlepage
+
+@ifnottex
+@node Top, Overview, (dir)
+@comment  node-name,  next,   up
+@top EPL - Error Propagation Library
+
+This file is updated automatically from @file{epl.texi}, which was
+last updated on @value{lastupdate}.
+@end ifnottex
+
+@menu
+* Overview::
+* Getting started::
+* How to use EPL::
+* Internals::  
+* Math foundation::
+* Miscellany::
+* Copying::
+* Concept Index::
+* Class/function/method Index::
+@end menu
+
+@node Overview, Getting started, Top, Top
+@comment  node-name,  next,  previous,  up
+@chapter Overview of EPL
+
+@c EPL is a library written in C++ for tracking numerical errors.
+
+The Error Propagation library EPL is a C++ library designed to extend
+calculations in a painless way to obtain a Gaussian error on your
+results if you know the error of your input. 
+
+There are two ways to look on EPL: First as an extension of a floating
+point type like @code{double} or @code{float} to include an error. Second as
+class for stochastic variables limited to Gaussian distributions. You
+will be able to read the manual and use EPL without touching stochastic,
+except if you read @ref{Math foundation}.
+
+EPL maintains something like a correlation matrix which allows to get
+the correlation between your variables. The library is designed for easy
+use instead of for fancy features or performance. EPL is a small piece of
+code, consider that as a design feature.
+
+@node Getting started, How to use EPL, Overview, Top
+@comment  node-name,  next,  previous,  up
+@chapter Getting started
+
+A small example illustrates the use of EPL. This program in included 
+as @file{sample0.cpp} in the distribution.
+
+@example
+@c we can not include sample0.cpp here because I do not know how to
+@c convince texi tex to leave { and } alone.
+#include <iostream>
+#include <math.h>
+#include "error.h"
+
+int main()@{
+  // constructing elements 
+  error<double> x(6.0,0.45,"x");
+  error<double> y(3.0,0.29,"y");
+  error<double> p("p"),m("m");
+
+  // performing the math as usual
+  p=x+y;
+  m=x-y;
+
+  //printing the results:
+  cout << x << endl << y << endl
+       << p << endl << m << endl;
+
+  //The correlations:
+  vector<error<double>*> ww;
+  ww.push_back(&p);
+  ww.push_back(&m);
+  print(cout,ww);
+
+  return 0;
+@}
+@end example
+
+The template class @code{error} replaces the floating point variables
+@samp{x,y,p} and @samp{m}. The arguments to the class constructor can be
+omitted, there are the value, the error of the value and a string with
+the name.
+
+The basic math operators and functions are defined for the class
+@code{error}. 
+
+The printing of the variables is implemented via 
+@xref{Calling ppoe, , ,ppoe}. The default configuration can be changed
+via @code{iomanip}. The output reads like
+@example 
+6.00(45)
+3.00(29)
+9.00(54)
+3.00(54)
+@end example
+
+Finally we collect pointers to @samp{p} and @samp{m} in the @code{vector}
+@samp{ww}. This enables us to print the correlation matrix.
+The default of the printing function does not print the covariance
+matrix elements by itself, but
+@example 
+   \sign(cov)*sqrt|cov|
+corr\___ error
+       |      p       m 
+-------+-------+-------
+      p|  0.535   0.344 
+      m|  0.413   0.535 
+@end example
+
+Happy coding!
+
+@node How to use EPL, Internals, Getting started, Top
+@comment  node-name,  next,  previous,  up
+@chapter How to use EPL
+
+@cindex error handling
+
+The user of EPL has only to deal with the template class @code{error}:
+@deftypefn class {template<typename T>} error ;
+@end deftypefn
+A instance of this class defines a stochastic variable, limited to a
+Gaussian distribution @ref{Math foundation}. Actually the design of the
+class is compatible with the picture that @code{error} is a variable of
+type @code{T} with an error. The value is called in the following
+mean and the error sigma. The precision is certainly given by
+@code{T}. The class or type @code{T} should be
+@code{double} or something similar. The exact requirements are listed
+@ref{Internals}.  The most poor error handling is implemented: On the
+few error conditions which exist an @code{exit(-1)} is executed.  The
+function signatures are alleviated of any template arguments in the
+following.
+
+The limited set of public member functions are
+
+@deftypemethod  error Constructor error (const T @var{mean}=zero, const T @var{sigma}=zero, const string @var{name}="NoName");
+@deftypemethodx error Constructor error (const T @var{mean}, const string @var{name});
+@deftypemethodx error Constructor error (const string @var{name});
+@deftypemethodx error Constructor error (const error & @var{a});
+The arguments to the constructors are in this order: The mean value
+@var{mean}, the error @var{sigma}, and the string @var{name}
+which is used only when you print the extended correlation matrix. If
+you omit the @var{mean} you must omit the @var{sigma} too. The copy
+constructor is also defined but expected to be of limited use for a
+programmer.
+@example
+error<double> a(1.0,0.5,"A");        
+error<float>  b(1.0);        
+error<double> c("C");        
+@end example
+You can not initialize variables with correlations.
+@end deftypemethod
+
+@deftypemethod  error Destructor ~error ();
+The destructor takes no argument as C++ requires.
+@end deftypemethod
+
+@deftypemethod  error T mean ();
+This method provides read access to the the mean of the distribution of
+the stochastic variable, the value of @var{mean}.
+@end deftypemethod
+
+@deftypemethod  error T abserr ();
+and the read access to @var{sigma} of the distribution of the stochastic
+variable. If the class @var{error} believes that the square of the
+@var{sigma} is negative, the (negative) square of @var{sigma} is
+returned.
+@end deftypemethod
+
+@deftypemethod  error T relerr ();
+the relative error is ratio of @var{sigma} and @var{mean}. The method 
+@code{exit(-1)} if @var{mean} is zero or @var{sigma} is negative.
+@end deftypemethod
+
+One design goal for EPL is to replace as easy as possible 
+the type/class T. To achieve this we have a set of functions
+dealing with variables of type @code{error}:
+
+@deftypefn operator ostream& << (ostream & @var{os},const @var{sigma} &);
+The output operator works as expected, the implementation uses, if
+available @code{ppoe}.
+@end deftypefn
+
+@deftypefn function void print (ostream& @var{os}, const vector<error<T>*>& @var{vec}, covariance_format @var{f}=CORR_ERR_SCOVH); 
+The vector of links to @code{error} instances determines the variables 
+included in the print. The enum @code{covariance_format} is an optional
+argument determining the formatting of the matrix:
+@defcv {formatting option} print covariance_format
+The possible values are controlling the exact content of
+the matrix printed. The @code{H} indicated that a descriptive header is
+included in the printout:
+@itemize *
+@item @code{COV}, @code{COVH}             covariance matrix
+@item @code{CORR}, @code{CORRH}           correlation matrix 
+@item @code{CORR_ERR_COV}, @code{CORR_ERR_COVH}  corr/error/cov stacked     
+@item @code{CORR_ERR_SCOV}, @code{CORR_ERR_SCOVH}  corr/error/sqrt(cov) stacked
+@end itemize
+Stacked means that the upper triangle, the diagonal and the lower
+triangle are of different matrices. Since the matrices are symmetric
+identical entries are avoided in these modes.
+@end defcv
+@end deftypefn
+
+@deftypefn function void draw (const error & @var{e1}, const error & @var{e2});
+For two variables you can see the error ellipse. For an interpretation of
+the ellipse see @ref{Math foundation}. @code{draw} uses Gnuplot.
+@end deftypefn
+
+@deftypefn function T covariance (const error & @var{e1}, const error & @var{e2});
+You have read access to the extended covariance matrix elements.
+@end deftypefn
+
+@deftypefn  operator bool == (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator bool != (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator bool <= (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator bool >= (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator bool <  (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator bool >  (const error & @var{e1}, const error & @var{e2});
+The set of comparison (logical and relational) operators are
+implemented by using the @var{mean} of the class instances. A good
+measure for equal within errors of @var{e1} and @var{e2} is
+@code{1/(e1-e2).relerr()}. This is by no means to compare with the
+@code{operator==}.
+@end deftypefn
+
+@deftypefn  function error sqrt (const error & @var{e});
+@deftypefnx function error sin  (const error & @var{e});
+@deftypefnx function error cos  (const error & @var{e});
+@deftypefnx function error tan  (const error & @var{e});
+@deftypefnx function error asin (const error & @var{e});
+@deftypefnx function error acos (const error & @var{e});
+@deftypefnx function error atan (const error & @var{e});
+@deftypefnx function error sinh (const error & @var{e});
+@deftypefnx function error cosh (const error & @var{e});
+@deftypefnx function error tanh (const error & @var{e});
+@deftypefnx function error exp  (const error & @var{e});
+@deftypefnx function error log  (const error & @var{e});
+@deftypefnx operator error operator+  (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator error operator-  (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator error operator*  (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator error operator/  (const error & @var{e1}, const error & @var{e2});
+@deftypefnx operator error operator+= (const error & @var{e1});
+@deftypefnx operator error operator-= (const error & @var{e1});
+@deftypefnx operator error operator*= (const error & @var{e1});
+@deftypefnx operator error operator/= (const error & @var{e1});
+The arithmetic functions and operators can by used as if there are
+defined on @code{T}. For the operators you can replace one
+argument by a @code{T} one. Since template constructors are not
+used for type conversion there are actually three definitions of
+@code{operator+}, @code{operator-}, @code{operator*} and @code{operator/}.
+
+The following standard arithmetic functions are not implemented:
+@code{log10}, @code{pow}, @code{atan2}, @code{fmod}, @code{frexp},
+@code{ldexp}, @code{modf}, @code{ceil}, @code{abs}, @code{fabs} and
+@code{floor}. Some of them will be defined in a future release of EPL.
+@end deftypefn
+
+@deftypefn  function error func (FuncObj const @var{fobj},const error & @var{e1});
+@deftypefnx function error func (FuncObj const @var{fobj},const error & @var{e1}, const error & @var{e2});
+@deftypefnx function error func (FuncObj const @var{fobj},const error & @var{e1}, const error & @var{e2}, const error & @var{e3});
+Functions or function objects can be used with the @code{func}
+function. The arguments are the function, the function pointer or the
+function object @var{fobj}, taking up to three arguments
+@var{e1},..,@var{e3} and returning @code{T}, and the arguments to
+@var{fobj}. Note that function @var{fobj} is evaluated three, five or
+seven times dependent on the number of arguments.
+@end deftypefn
+
+@cindex memory allocation
+
+For good run time performences you should adjust the default argument
+@var{cap} to the constructor of the class @code{matrix} in
+@file{matrix.h}. 
+
+@node Internals, Math foundation, How to use EPL, Top
+@comment  node-name,  next,  previous,  up
+@chapter Internals
+
+@cindex Class structure 
+
+You will find here a brief outline of the different classes and there 
+purpose. 
+
+@deftypefn class {template<typename T>} error ;
+The class @code{error} is the only one seen by the user of EPL 
+@ref{How to use EPL}.  Therefore all the functionality is represented 
+as members and friends of @code{error}. Eg. @code{operators} @samp{+} 
+and @samp{*} as well as printing facilities.  The data members are 
+the value and the name of the variable as well as a pointer to a 
+object of type @code{correlation} and an index to locate the 
+row/column in this object.
+@end deftypefn
+
+@deftypefn class {template<typename T>} correlation ;
+The class @code{error} uses the class @code{correlation}
+as interface to store and update the extended correlation matrix. 
+Furthermore, some basic memory management is implemented
+in @code{correlation}: reuse of unused columns/rows is possible.
+This prevents class @code{matrix} from frequent allocation requests.
+The class @code{correlation} has only one instance through the
+lifetime of the program. 
+@end deftypefn
+@deftypefn class {template<typename T>} matrix ;
+The class @code{matrix} is a preliminary hack. The important and uncommon
+features of this class are the @code{resize} and @code{push_back}
+methods for rows and columns. The current implementation is based on
+@code{vector} and might be replaced by an implementation based on
+@code{map}.
+@end deftypefn
+
+The class @code{error} act through @code{correlation} on @code{matrix}
+only through the following member functions:
+@deftypemethod  error void addtoT (const error<T> & @var{e}, const T &@var{d});
+@deftypemethodx error void applyT (const error<T> & @var{e}, const T &@var{d});
+The manipulation of the expended correlation matrix is realized exclusive
+by the two methods @code{addtoT} and @code{applyT}. The value of
+@var{*this} is a function of variables @var{e_1} to @var{e_n}.
+register the first n-1 variables and the partial derivation of
+@var{*this} with respect to @var{e_i} (@var{d}) with a call of method
+@code{addtoT}. The registration of the last variable is done with
+@code{applyT}, this method manipulates the extended correlation matrix
+and also frees the all values.
+@end deftypemethod
+
+The pretty printing of errors is realized via ppoe 
+@xref{Calling ppoe, , ,ppoe}. Instead
+of including the whole ppoe package only the low level subroutine
+@file{errlow.c} and the C++ interface @file{errC.cpp} is included.
+
+@deftypefn function void gnuplot (const char* @var{cmd});
+This function handles the calling and handshaking with Gnuplot.
+The function is written in C and stored in @file{gnuplotad.c}. 
+A small documentation and example for its use, even with Fortran 77
+is included in the source file.
+@end deftypefn
+
+The code is distributed over files as it would not be template classes.
+That means the member definitions can be found in @file{*.cpp} files which
+are included in the header files (@file{*.h}).
+
+@node Math foundation, Miscellany, Internals, Top
+@comment  node-name,  next,  previous,  up
+@chapter Math foundation
+
+The first section of this chapter is a very brief review of statistics
+with focus on Gaussian distributions. In the second section we define the
+extended correlation matrix and the operations on it. Do not expect
+mathematical precision, the manual is written by a physicist.
+
+@section Statistics  
+
+@cindex stochastic variable
+@cindex Gaussian distribution
+@cindex Correlation matrix
+@cindex Error interpretation
+
+@c iftex
+@c include math.tex
+@c end iftex
+@c@math {g(y)=\int dx \; g(x) \delta(y-x)}
+
+@c@ifhtml
+@c Since the math formatting in html is poor we include here
+@c the plain info part of the document. Note that even the plain
+@c info part is poor too, switch to the dvi/ps/pdf version of
+@c this document for best math typesetting.
+@include math.texi
+@c @end ifhtml
+@c @ifinfo
+@c Switch to the dvi/ps/pdf version of this document for best math typesetting.
+@c include math.info
+@c end ifinfo
+
+@node Miscellany, Copying, Math foundation, Top
+@comment  node-name,  next,  previous,  up
+@chapter Miscellany
+
+This chapter contains some thoughts what can and will be done
+in future. The items in the section are sorted by priority.
+
+@menu
+* todo for code::               
+* todo for distro::             
+* todo for documentation::      
+* QA of the author::            
+@end menu
+
+@include todo.texi
+
+@node Copying,  Concept Index, Miscellany,  Top
+@comment  node-name,  next,  previous,  up
+@chapter Copying
+
+@c Enable the including of the file COPYING in epl.info around
+@c line 376 by removing the @@c
+@include COPYING
+
+@node Concept Index, Class/function/method Index, Copying,  Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Concept Index
+@printindex cp
+
+@node Class/function/method Index, , Concept Index, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Class/function/method Index
+
+@syncodeindex vr fn
+@syncodeindex pg fn
+@syncodeindex tp fn
+
+@printindex fn
+
+@contents
+
+@bye

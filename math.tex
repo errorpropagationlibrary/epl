@@ -1,0 +1,165 @@
+@tex
+@subsection A single variable
+EPL considers only variables with Gaussian distributions. That means the
+probability density for a specific value $x$ of a stochastic variable
+$X$ is given by 
+
+$$ \rho_{X}(x)={1 \over \sqrt{2\pi\sigma^2}}
+  \exp\left(-{1 \over 2} (x-\overline{X}) \sigma^{-2} 
+                        (x-\overline{X}) \right) $$
+
+The two parameters $\overline{X}$ and $\sigma$ determines a Gaussian 
+distribution completely. $\overline{X}$ is the $x$-value with the
+highest probability density and $\sigma$ is known as error of $X$.
+
+Since $\rho_{X}$ is a density, the probability for a value
+$x\in[x_i,x_j]$ is obtained by an integral:
+
+$$p_{X}(x_i<x<x_f)=\int_{x_i}^{x_f} dx' \; \rho_{X}(x')$$
+
+To complete our discussion we have to analyze a function $F$ mapping a
+stochastic variable into another. This function shall be defined by
+a function $f$ mapping all values of $X$, $x$ to values of $Y$, $y$:
+
+$$ F(X)=Y \leftarrow f(x)=y$$
+
+the probability density of $Y$ is given by@footnote{The
+$\delta$-function is defined by 
+
+$$ g(y)=\int dx \; g(x) \delta(y-x)$$
+}
+
+$$ \widehat{\rho}_{Y}(w) =\int dx \; \rho_{X}(v) \delta(f(x)-w)$$
+
+Since we deal only with Gaussian errors in EPL we approximate $\widehat{p}_{Y}(w)$
+by the Gaussian distribution. I add a superscript to $\sigma$ in order to 
+distinguish between the error of $X$ and $Y$.
+
+$$ \overline{Y}=f(\overline{X})$$
+$$ \sigma^{Y} = \left| {\partial f \over \partial x}(\overline{X}) \right|
+                \sigma^{X}$$
+
+The approximation of the distribution $\widehat{p}$ is given by the Gaussian
+distribution with the parameters $\overline{Y}$ and $\sigma_Y$. We
+name this distribution $\rho_{Y}$ instead of $\widehat{\rho}_{Y}$. Note that
+$\rho_{Y} = \widehat{\rho}_{Y}$ iff $f$ is a linear function of $x$.
+
+@subsection Multidimensional case
+
+If several variables $X_i, i=1\ldots n$ are independent,
+the joint probability distribution is the product of the 
+individual distributions.
+
+$$ \rho_{\vec{X}}(\vec{x})=
+  {1 \over \left(2\pi\right)^{n/2} \sqrt{\det(C)}} 
+     \exp\left(-{1 \over 2} \sum_{i,j=1}^n 
+      \left(x_i-\overline{X_i}\right) 
+                \left(C_{ij}\right)^{-1} 
+      \left(x_j-\overline{X_j}\right) \right) $$
+
+The $n\times n$ Matrix $C$ is symmetric and positive definite and it is called
+correlation matrix. 
+If the variables are uncorrelated $C$ is a diagonal matrix composed of
+$\sigma_i^2$.
+For the inverse matrix of $C$, the curvature matrix the letter
+$\alpha$ is common.
+If we have given $p_{\vec{X}}(\vec{x})$ we can
+obtain $\overline{X_i}$ and $C_{ij}$ via
+
+$$ \overline{X_i}=\int dx^n \; x_i p_{\vec{X}}(\vec{x}) $$
+$$ C_{ij} = \int dx^n \;
+      \left(x_i-\overline{X_i}\right)\left(x_j-\overline{X_j}\right)
+    p_{\vec{X}}(\vec{x}) $$
+
+Consider now a $m$-value function $f$ of the $n$ variables $\vec{x}$
+defined by the values $\vec{f}(\vec{x})$. 
+This function is used as in the one dimensional case to map the vector
+$\vec{X}$ of stochastic variables to the vector $\vec{Y}$.
+As we will see, Stochastic requires $m\le n$.
+The Gaussian approximation of the probability density is given by the
+parameters:
+
+$$ \overline{Y_i}=f_i(\overline{X})$$
+$$  C^{Y}_{kl} = \sum_{i,j=1}^{n} 
+     {\partial f_k \over \partial x_i}(\overline{X})
+        C^{X}_{ij}
+     {\partial f_l \over \partial x_j}(\overline{X}) $$
+
+Note that for $m>n$ the correlation matrix $C^{Y}$ is not positive
+definite, but semi positive definite and that the approximation is
+exact iff $f$ is a linear function.
+
+As a note unrelated to EPL: All the other distributions you learned in
+your statistic class, like the $\chi^2$ distribution, are exact
+distributions of some functions (estimators) $f$ over a set of
+independent equally distributed stochastic variables (your sample).
+
+In order to understand the correlation matrix we consider a two
+dimensional example:
+  
+$$ C=\left( C_{xx} \; C_{xy} \atop C_{yx} \; C_{yy} \right) $$ 
+
+In figure (3) you see in the $x$-$y$ plane a curve of constant
+probability density $k$. The maximum probability density is located in the 
+middle of the curve $(\overline{X},\overline{Y})$, which is actually a 
+ellipse. 
+
+@include{ellipse.tex}
+
+The probability to find a $(x,y)$ pair in the ellipse is equal to
+
+$$ p=\int_{0}^{k} dr \; \chi_d^2(r) $$
+
+where we have to set the number of dimensions to $d=2$ for our
+example. 
+The relationship between the parameter of the ellipse and the correlation
+matrix are given by
+
+$$ \sigma_{X}=\sqrt{k C_{xx}}        $$
+$$ \sigma_{Y}=\sqrt{k C_{yy}}        $$
+$$      s_{X}=\sqrt{k / \alpha_{xx}} $$
+$$      s_{Y}=\sqrt{k / \alpha_{yy}} $$
+
+where $\alpha=C^{-1}$, the curvature matrix. Therefore the error of
+a stochastic variable can be read of the correlation matrix. 
+
+The eigenvalues of the matrix $C$ are given by
+
+$$\lambda_i={C_{xx}+C_{yy} \over 2 } \pm 
+       \sqrt{{(C_{xx}-C_{yy})^2 \over 4} +C_{xy}^2  }$$
+
+and therefore the two half-axes by $a_i=\sqrt{k\lambda_i}$. The
+ellipse is tilded by $\tan(\alpha)={\lambda_{+}-C_{xx}\over C_{xy}}$,
+and the eccentricity is given by $e=\sqrt{1-\lambda_{-}/\lambda_{+}}$
+
+@section The EPL matrix
+
+The EPL matrix is a superset of the correlation matrix in the sense
+that a block of the EPL matrix is the correlation matrix. The EPL matrix
+is symmetric and semi positive definite. To handle the formulas we 
+switch to matrix notation, the formula (??) looks then like:
+
+$$  C^{Y} = F_{ki}(\overline{X}) C^{X} F^{t}(\overline{X}) $$
+$$  F_{ki}(\overline{X})= {\partial f_k \over \partial x_i}(\overline{X}) $$
+ 
+The $k$-th row of $F$ depends only on $f_k$, not on
+$f_l$. We can extend the function $f$ to $f'$ where
+$f'_i=f_i$ for $1< i \le m$ and $f'_i=x_i$ for $m < i \le m+n$.
+The EPL matrix $E^{f}$ is calculated in the same way as $C^{Y}$:
+
+$$  E = F'_{ki}(\overline{X}) C^{X} F'{t}(\overline{X}) $$
+$$  F'_{ki}(\overline{X})= {\partial f'_k \over \partial x_i}(\overline{X}) $$
+
+and the upper left $m \times m $ block of $E$ is identical to $C^{Y}$. 
+The matrix $F'$ consist of an upper $m \times n $ block identical to $F$
+and a lower block identical to the $n \times n $ identity matrix.
+
+It is clear that a matrix $E$ can be extended to include all dependent
+and independent variables. In fact the matrix $E$ does not know which
+variables are included in the first place and which are generated by
+applying a function on the variables. Furthermore the extension can be 
+dynamically, we do not have to know how many variables $E$ has to keep
+at the end. At the same time we can delete a row and the corresponding
+column associated with a  obsolete variable.
+
+@end tex

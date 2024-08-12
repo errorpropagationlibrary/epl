@@ -1,0 +1,178 @@
+# Makefile for ppoe.	-*- Indented-Text -*-
+# Copyright (C) 2000, 2001 Achim Bode.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
+TEXI2PDF = texi2pdf
+DVIPDF = dvipdfmx
+DVIPS = dvips
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+
+CFLAGS = -g -Wall
+LDFLAGS = -g -Wall
+CXXFLAGS = -g -Wall
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+
+bindir = $(exec_prefix)/bin
+infodir = $(prefix)/info
+
+# Prefix to be prepended to each installed program, normally empty or `g'.
+binprefix = 
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+PPOESRC  = errC.cpp errlow.c
+MATRIXSRC= epl_matrix.cpp
+GNUPLOT  = gnuplotad.c
+EPLSRC   = $(MATRIXSRC) $(PPOESRC) $(GNUPLOT)
+
+EPLOBJ   =errC.o errlow.o gnuplotad.o
+
+PPOEHDR  =errlow.h errC.h
+MATRIXHDR=matrix.h
+EPLHDR   =$(MATRIXHDR) $(PPOEHDR)
+
+
+SRCS = beware.cpp tracking.cpp basics.cpp version.c \
+       $(EPLSRC)
+
+OBJS = beware.o tracking.o basics.o usematrix.o version.o
+
+HDRS     = config.h my-config.h $(EPLHDR) 
+
+DISTFILES = $(SRCS) $(HDRS) INSTALL COPYING ChangeLog NEWS \
+            epl.texi math.info math.tex texinfo.tex gpl.texi\
+            ellipse.gp ellipse.txt ellipse.jpg ellipse.tex todo.texi\
+	    configure  Makefile.in configure.in config.h.in \
+	    mkinstalldirs install-sh 
+
+#dependencs generated manually via makedepend -Y./ *.{c,h,cpp}
+
+config.o: my-config.h
+errC.o: errlow.h config.h my-config.h
+errlow.o: config.h my-config.h errlow.c
+errlow.o: config.h my-config.h
+
+all: beware tracking basics epl.pdf
+.PHONY: all
+
+.PHONY: info dvi html pdf ps
+info: epl.info
+dvi:  epl.dvi
+ps:   epl.ps
+html: epl.html
+pdf:  epl.pdf
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(DEFS) $(CFLAGS) $<
+
+.PHONY: install installdirs
+install: installdirs epl epl.info
+	$(INSTALL_PROGRAM) epl $(bindir)/$(binprefix)epl
+	-$(INSTALL_DATA) $(srcdir)/epl.info $(infodir)/epl.info
+installdirs:
+	${srcdir}/mkinstalldirs $(bindir) $(infodir)
+
+basics: basics.o $(EPLOBJ)
+	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
+tracking: tracking.o $(EPLOBJ)
+	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
+beware: beware.o $(EPLOBJ)
+	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
+#ppoe: ppoe.o $(EPLOBJ)
+#	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
+
+epl.info: ellipse.txt 
+	$(MAKEINFO) -I$(srcdir) -o epl.info $(srcdir)/epl.texi
+epl.dvi:  ellipse.tex
+	$(TEXI2DVI) $(srcdir)/epl.texi
+epl.pdf:
+	$(TEXI2PDF) $(srcdir)/epl.texi
+epl.html: ellipse.jpg
+	$(MAKEINFO) --html $(srcdir)/epl.texi
+
+#epl.pdf: epl.ps
+#	ps2pdf epl.ps
+#	@echo "hint: xpdf failes on viewing $@, but gv works"
+#	@echo "See Makefile for alternative pdf file generation"
+#epl.pdf: 
+#	TEX=pdftex; export TEX ; texi2dvi $(srcdir)/epl.texi
+#	@echo "postscripts pictures are not included in document"
+#	@echo "See Makefile for alternative pdf file generation"
+
+
+epl.pdf epl.info epl.dvi epl.html:  epl.texi math.tex math.info todo.texi
+math.tex:  ellipse.tex
+math.info: ellipse.txt ellipse.jpg
+
+ellipse.jpg ellipse.tex ellipse.txt: ellipse.gp
+	gnuplot $(srcdir)/ellipse.gp
+
+Makefile: Makefile.in config.status
+	$(SHELL) config.status
+
+config.status: configure
+	$(srcdir)/configure --no-create
+
+TAGS: $(SRCS)
+	etags $(SRCS)
+
+.PHONY: clean mostlyclean distclean realclean dist
+
+clean:
+	rm -f epl *.o core test.out \
+              *.info *.dvi epl.?? epl.??.bak epl.??s\
+              epl.aux epl.toc epl.log epl.pdf epl.html\
+              ellipse.txt ellipse*.tex ellipse.jpg\
+              beware tracking basics
+
+mostlyclean: clean
+
+distclean: clean
+	rm -f Makefile config.status config.log config.cache
+
+realclean: distclean
+	rm -f TAGS epl.info*
+
+dist: $(DISTFILES)
+	echo epl-`sed -e '/version/!d' -e 's/[^0-9.]*\([0-9.]*\).*/\1/'\
+                      -e q version.c` > .fname
+	rm -rf `cat .fname`
+	mkdir `cat .fname`
+	ln $(DISTFILES) `cat .fname`
+	tar cozf `cat .fname`.tgz `cat .fname`
+	rm -rf `cat .fname` .fname
+
+# Prevent GNU make v3 from overflowing arg limit on SysV.
+.NOEXPORT:
+

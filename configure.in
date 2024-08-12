@@ -1,0 +1,29 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(beware.cpp)
+AC_INIT(basics.cpp)
+AC_INIT(tracking.cpp)
+
+dnl the standart stuff (for a C program)
+AC_PROG_CC
+AC_PROG_CPP
+
+dnl the standart stuff (for a C++ program)
+AC_PROG_CXX
+AC_PROG_CPP
+
+AC_CONFIG_HEADER(config.h)
+
+dnl headers and lib-functions used in the core routine
+dnl AC_HAVE_HEADERS(string.h)
+dnl AC_CHECK_LIB(m,log10)
+dnl AC_HAVE_HEADERS(assert.h)
+
+dnl headers and lib-functions used in the support routines
+dnl Btw, how prevent multiple inclusion of -lm at linking?
+AC_STDC_HEADERS
+AC_CHECK_LIB(m,pow)
+AC_CHECK_LIB(m,log10)
+AC_HAVE_HEADERS(assert.h)
+
+dnl Create a Makefile from Makefile.in
+AC_OUTPUT(Makefile)

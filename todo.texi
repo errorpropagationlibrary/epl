@@ -1,0 +1,64 @@
+@node todo for code, todo for distro,  Miscellany, Miscellany
+@section Things to polish in the code
+@enumerate
+@item
+define log10 pow...
+@item
+correlation matrix printing needs some tuning (check floatfield...)
+@item
+implement a class for storing and analysing the use/reuse and
+allocation of memory in matrix.
+@item
+The only exit condition of class error is in relerr(). The definition
+of an and throwing of an exception for that might be to luxurious.
+@item
+rewrite ppoe (pretty printing of errors). 
+@item
+Write a gnuplot C++ interface instead of using the C interface. 
+@end enumerate
+
+@node todo for distro, todo for documentation, todo for code, Miscellany
+@section The distribution needs some work on
+@enumerate
+@item
+One unresolved issue with vector<T>::reserve() in matrix.
+@item
+include GPL hint in all source files.
+@item
+make my-config automatic, revise configure.in
+@end enumerate
+
+@node todo for documentation, QA of the author, todo for distro, Miscellany
+@section The documentation need to consider
+@enumerate
+@item
+Explain use of usematix.cpp
+@item
+log: explain why value-sigma can be negative....
+@item
+Add the interpretation s_@{X@} and s_@{Y@} in the math part.
+@item
+Split the the nodes in smaller chunks.
+@item
+Include the namespace into documentation
+@end enumerate
+
+@node  QA of the author, ,todo for documentation, Miscellany
+@section Questions and answers to myself.
+@enumerate
+@item
+Why we need the uncommon (friend) declaration of error<>::print?
+@item
+Performance consideration: Compile and run time.
+Should we define template specialization for class error and
+companions? Or defining them independently, as in complex done.
+Is this discussion meaningless since export doen't work with
+most compilers?
+@item
+The printing of the error ellipsoid with gnuplot is unstable, 
+should we offer to do that also via plotutil?
+@item
+Investigate how error can deal with non-scalar types (eg containers).
+@item
+Investigate why the html and info output of the manual do not contain proper math.
+@end enumerate
