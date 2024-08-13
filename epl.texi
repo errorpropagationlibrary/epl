@@ -3,7 +3,7 @@
 @setfilename epl.info
 @settitle EPL documentation
 @c This date is automagically updated when you save this file:
-@set lastupdate June, 5 2001
+@set lastupdate August, 12 2001
 @c %**end of header
 
 @c need this for the external reference to ppoe
@@ -55,7 +55,7 @@ except if you read @ref{Math foundation}.
 EPL maintains something like a correlation matrix which allows to get
 the correlation between your variables. The library is designed for easy
 use instead of for fancy features or performance. EPL is a small piece of
-code, consider that as a design feature.
+code, consider that a design feature.
 
 @node Getting started, How to use EPL, Overview, Top
 @comment  node-name,  next,  previous,  up
