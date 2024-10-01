@@ -1,20 +1,19 @@
 # Makefile for ppoe.	-*- Indented-Text -*-
-# Copyright (C) 2000, 2001 Achim Bode.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
+#/*
+#   Copyright (C) 2000 .. 2024 Achim Bode
+#
+#   This file is part of epl (error propagation library).
+#
+#   epl is free software: you can redistribute it and/or modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE version 3
+#   as published by the Free Software Foundation.
+#
+#   epl is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#   or FITNESS FOR A PARTICULAR PURPOSE. See the GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+#
+#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE along with epl. If not, see <https://www.gnu.org/licenses/>.
+#*/
+#
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
@@ -32,7 +31,7 @@ DVIPDF = dvipdfmx
 DVIPS = dvips
 
 DEFS = @DEFS@
-LIBS = @LIBS@
+LIBS = @LIBS@ -lfmt
 
 CFLAGS = -g -Wall
 LDFLAGS = -g -Wall
@@ -51,14 +50,14 @@ binprefix =
 
 SHELL = /bin/sh
 
-PPOESRC  = errC.cpp errlow.c
+PPOESRC  = ppoe.cpp
 MATRIXSRC= epl_matrix.cpp
 GNUPLOT  = gnuplotad.c
 EPLSRC   = $(MATRIXSRC) $(PPOESRC) $(GNUPLOT)
 
-EPLOBJ   =errC.o errlow.o gnuplotad.o
+EPLOBJ   = ppoe.o gnuplotad.o
 
-PPOEHDR  =errlow.h errC.h
+PPOEHDR  = ppoe.h
 MATRIXHDR=matrix.h
 EPLHDR   =$(MATRIXHDR) $(PPOEHDR)
 
@@ -79,9 +78,9 @@ DISTFILES = $(SRCS) $(HDRS) INSTALL COPYING ChangeLog NEWS \
 #dependencs generated manually via makedepend -Y./ *.{c,h,cpp}
 
 config.o: my-config.h
-errC.o: errlow.h config.h my-config.h
-errlow.o: config.h my-config.h errlow.c
-errlow.o: config.h my-config.h
+#errC.o: errlow.h config.h my-config.h
+#errlow.o: config.h my-config.h errlow.c
+#errlow.o: config.h my-config.h
 
 all: beware tracking basics epl.pdf
 .PHONY: all
@@ -109,8 +108,6 @@ tracking: tracking.o $(EPLOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
 beware: beware.o $(EPLOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
-#ppoe: ppoe.o $(EPLOBJ)
-#	$(CXX) $(LDFLAGS) -o $@ $+ $(LIBS)
 
 epl.info: ellipse.txt 
 	$(MAKEINFO) -I$(srcdir) -o epl.info $(srcdir)/epl.texi

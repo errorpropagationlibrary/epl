@@ -3,7 +3,7 @@
 @setfilename epl.info
 @settitle EPL documentation
 @c This date is automagically updated when you save this file:
-@set lastupdate August, 12 2001
+@set lastupdate August, 12 2024
 @c %**end of header
 
 @c need this for the external reference to ppoe

@@ -1,4 +1,4 @@
-/* 
+/*
    Copyright (C) 2000 .. 2024 Achim Bode
 
    This file is part of epl (error propagation library).
@@ -14,6 +14,9 @@
 #ifndef MATRIXH
 #define MATRIXH
 #include <vector>
+#include <iostream>
+#include <iomanip>
+
 
 using namespace std;
 
@@ -51,33 +54,6 @@ class matrix{
 template<typename T>
 const T matrix<T>::zero=static_cast<T>(0);
 
-#endif
-/* matrix.cpp from epl, error propagation library.
-   Copyright (C) 2000, 2001 Achim Bode
-   
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-//
-//   This is a hack.... 
-//   does anyone know a matrix lib with
-//   insert and erase member functions for rows/columns?
-//  
-//   maybe the valarray stuff in the standart lib is good?
-//
-#include <vector>
-#include <iostream>
-#include <iomanip>
 
 template <typename T>
 matrix<T>::matrix(const int r, const int c, const int cap)
@@ -180,3 +156,4 @@ inline void matrix<T>::erase(const int dim, int r){
     {cerr<<"Wrong dim arg in "<<__FILE__<<" at "<<__LINE__<<":"<<dim<<endl;}
   return;}
     
+#endif

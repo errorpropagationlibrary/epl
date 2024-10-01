@@ -24,7 +24,7 @@
 #include <math.h>
 
 #include "epl_correlation.h"
-#include "errC.h"
+#include "ppoe.h"
 
 namespace epl{
   using namespace std;
