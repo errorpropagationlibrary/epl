@@ -211,6 +211,7 @@ int main(){
   FormatCPP("left        {0:X<20.2E}");        // leads to left        9.23E+04XXXXXXXXXXXX         left        9.234568(35)E4XXXXXX
   FormatCPP("right       {0:X>20.2E}");        // leads to right       XXXXXXXXXXXX9.23E+04         right       XXXXXX9.234568(35)E4
   FormatCPP("middle      {0:X^20.2E}");        // leads to middle      XXXXXX9.23E+04XXXXXX         middle      XXX9.234568(35)E4XXX
+  FormatCPP("middle      {0:X^ 20.2E}");       // leads to middle      XXXXXX9.23E+04XXXXXX         middle      XXX9.234568(35)E4XXX
   FormatCPP("always plus {0:+.2E}");           // leads to always plus +9.23E+04                    always plus +9.234568(35)E4
   FormatCPP("only minus  {0:-.2E}");           // leads to only minus  9.23E+04                     only minus  9.234568(35)E4
   FormatCPP("leading ' ' {0: .2E}");           // leads to leading ' '  9.23E+04                    leading ' '  9.234568(35)E4

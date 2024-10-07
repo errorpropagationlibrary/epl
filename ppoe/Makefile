@@ -59,6 +59,11 @@ demoC:
 	$(CC) -c $(CCFLAGS) demo.c  
 	$(CC) $(LDFLAGS) -o $@ demo.o ppoe.o -lm
 
+test: demo demoC
+	echo "diff agains recoreded output"
+	./demo | diff - demo.output
+	./demoC | diff - demoC.output 
+
 #Makefile: Makefile.in config.status
 #	$(SHELL) config.status
 
